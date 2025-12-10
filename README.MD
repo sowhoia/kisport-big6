@@ -12,58 +12,89 @@ BIG6 — это азартная игра с игральными костями
 
 ## Платформы
 
-- **Linux** — Python 3.10+
-- **Windows** — Python 3.10+
-- **Web** — браузер с поддержкой JavaScript (через Pyodide)
+| Платформа | Файл | Статус |
+|-----------|------|--------|
+| Linux | `big6.py` | ✅ |
+| Windows | `big6.py` | ✅ |
+| Web (Pyodide) | `index.html` | ✅ |
+| Android (Termux) | `big6.py` | ✅ |
+| Plan9 | `big6_plan9.py` | ✅ |
+| Bootloader (симуляция) | `big6_boot.py` | ✅ |
 
 ## Сборка и запуск
 
 ### Linux / Windows
 
 ```bash
-# Запуск игры
-make run
-# или
-python3 big6.py
-
-# Запуск тестов
-make test
+make run        # Запуск игры
+make test       # Запуск тестов
 ```
 
 ### Web-версия
 
 ```bash
-make web
+make web        # http://localhost:8000
 ```
 
-Откройте в браузере: http://localhost:8000
+### Android (Termux)
+
+1. Установите [Termux](https://termux.dev/) из F-Droid
+2. Скопируйте проект на устройство
+3. Запустите:
+
+```bash
+chmod +x termux_setup.sh
+./termux_setup.sh
+# или вручную:
+pkg install python
+python big6.py
+```
+
+### Plan9
+
+Используйте `big6_plan9.py` — версию с базовым I/O через `sys.stdout/stdin`:
+
+```bash
+python big6_plan9.py
+```
+
+Для Plan9 с портом Python (9legacy/plan9port):
+```
+/bin/python big6_plan9.py
+```
+
+### Bootloader (симуляция)
+
+`big6_boot.py` — упрощённая версия, демонстрирующая минималистичный I/O:
+
+```bash
+python big6_boot.py
+```
+
+Особенности:
+- Ставка только на одно число за раз
+- Минимальный вывод
+- Ввод: число (1-6), ставка (1-500), 0 для выхода
 
 ## Автоматическое тестирование
 
-Тесты проверяют соответствие поведения портированной версии оригиналу на BASIC. Каждый тест содержит:
-- `tests/*.input` — входные данные (диалог игрока)
-- `tests/*.expected` — эталонный вывод
-
-Для детерминированного тестирования используется переменная окружения `BIG6_SEED`:
-
 ```bash
-BIG6_SEED=42 python3 big6.py < tests/test1.input
+make test                           # Запуск всех тестов
+BIG6_SEED=42 python big6.py < tests/test1.input  # Детерминированный запуск
 ```
 
 ## Структура проекта
 
 ```
-.
 ├── big6.bas          # Оригинал на BASIC
-├── big6.py           # Порт на Python
-├── test_big6.py      # Автотесты
+├── big6.py           # Основная версия (Linux/Windows)
+├── big6_plan9.py     # Версия для Plan9
+├── big6_boot.py      # Bootloader-симуляция
 ├── index.html        # Web-версия (Pyodide)
-├── Makefile          # Сборка
+├── termux_setup.sh   # Скрипт установки для Android
+├── test_big6.py      # Автотесты
 ├── tests/            # Тестовые данные
-│   ├── test1.input
-│   ├── test1.expected
-│   └── ...
-└── README.MD
+└── Makefile
 ```
 
 ## Пример работы
@@ -73,15 +104,12 @@ BIG6_SEED=42 python3 big6.py < tests/test1.input
                    CREATIVE COMPUTING
                  MORRISTOWN, NEW JERSEY
 
-
-
   THIS PROGRAM IS A DICE WHEEL GAME IN WHICH
 YOU CAN BET ON ANY NUMBER BETWEEN ONE AND SIX
 AND UP TO THREE NUMBERS.
   THE HOUSE LIMIT IS FROM $1 TO $500!!
 TO END THIS PROGRAM TYPE THE WORD 'STOP'.
 GOOD LUCK!
-
 
 HOW MANY NUMBERS DO YOU WANT TO BET ON? 1
 WHAT NUMBER? 3
@@ -92,7 +120,6 @@ YOU'RE AHEAD $100
 
 HOW MANY NUMBERS DO YOU WANT TO BET ON? STOP
 
-
 SO YOU WANT TO CASH IN YOUR CHIPS, I SEE!!
 YOU WON EXACTLY $100!! NOT BAD !!!
 ```
@@ -100,3 +127,4 @@ YOU WON EXACTLY $100!! NOT BAD !!!
 ## Оригинал
 
 Оригинальный код на BASIC взят из [More BASIC Computer Games](https://www.roug.org/retrocomputing/languages/basic/morebasicgames).
+
