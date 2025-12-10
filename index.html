@@ -119,7 +119,8 @@ async def async_input(prompt=''):
                 .replace(/^from typing import Iterable$/m, '')
                 .replace(/Iterable\[int\]/g, 'list')
                 .replace(/input\(/g, 'await async_input(')
-                .replace(/def (prompt_\w+|main)\(/g, 'async def $1(')
+                .replace(/def (prompt_\w+|roll_lucky_numbers|resolve_single_bet|print_running_total|cash_out|main)\(/g, 'async def $1(')
+                .replace(/(prompt_bet_count|prompt_single_bet|prompt_two_numbers|prompt_two_wagers|prompt_three_numbers|prompt_three_wagers|roll_lucky_numbers)\(\)/g, 'await $1()')
                 .replace(/if __name__.*:[\s\S]*$/, '');
 
             await pyodide.runPythonAsync(modifiedCode);
