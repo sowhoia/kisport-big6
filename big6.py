@@ -42,7 +42,7 @@ def prompt_bet_count() -> int | None:
     Возвращает None, если пользователь ввёл STOP.
     """
     while True:
-        raw = input("HOW MANY NUMBERS DO YOU WANT TO BET ON").strip()
+        raw = input("HOW MANY NUMBERS DO YOU WANT TO BET ON? ").strip()
         if raw.upper() == "STOP":
             return None
         try:
@@ -65,7 +65,7 @@ def prompt_single_bet() -> tuple[int, int]:
     (использовались OR, которые фактически пропускают любое число/ставку).
     """
     while True:
-        raw_number = input("WHAT NUMBER")
+        raw_number = input("WHAT NUMBER? ")
         try:
             number = int(raw_number)
         except ValueError:
@@ -78,7 +78,7 @@ def prompt_single_bet() -> tuple[int, int]:
         print("YOU CAN ONLY BET ON AN INTEGER FRON ONE TO SIX.")
 
     while True:
-        raw_wager = input("WAGER")
+        raw_wager = input("WAGER? ")
         try:
             wager = int(raw_wager)
         except ValueError:
@@ -94,7 +94,7 @@ def prompt_single_bet() -> tuple[int, int]:
 def prompt_two_numbers() -> tuple[int, int]:
     """Запрашивает два числа для ставки, сохраняя исходную «широкую» проверку."""
     while True:
-        raw = input("WHAT TWO NUMBERS")
+        raw = input("WHAT TWO NUMBERS? ")
         parts = raw.replace(",", " ").split()
         if len(parts) != 2:
             print("YOU CAN ONLY BET ON AN INTEGER FROM ONE TO SIX.")
@@ -115,7 +115,7 @@ def prompt_two_numbers() -> tuple[int, int]:
 def prompt_two_wagers() -> tuple[int, int]:
     """Запрашивает две ставки; ограничения дома сохраняются как в BASIC (OR)."""
     while True:
-        raw = input("WAGER ON BOTH")
+        raw = input("WAGER ON BOTH? ")
         parts = raw.replace(",", " ").split()
         if len(parts) != 2:
             print("THE HOUSE LIMIT IS FROM $1 TO $500.")
@@ -136,7 +136,7 @@ def prompt_two_wagers() -> tuple[int, int]:
 def prompt_three_numbers() -> tuple[int, int, int]:
     """Запрашивает три числа для ставки, отражая исходные проверки через OR."""
     while True:
-        raw = input("WHAT THREE NUMBERS")
+        raw = input("WHAT THREE NUMBERS? ")
         parts = raw.replace(",", " ").split()
         if len(parts) != 3:
             print("YOU CAN ONLY BET ON AN INTEGER FROM ONE TO SIX.")
@@ -164,7 +164,7 @@ def prompt_three_numbers() -> tuple[int, int, int]:
 def prompt_three_wagers() -> tuple[int, int, int]:
     """Запрашивает три ставки, оставляя оригинальные границы с OR."""
     while True:
-        raw = input("WAGER ON EACH OF THE THREE")
+        raw = input("WAGER ON EACH OF THE THREE? ")
         parts = raw.replace(",", " ").split()
         if len(parts) != 3:
             print("THE HOUSE LIMIT IS FROM $1 TO $500.")

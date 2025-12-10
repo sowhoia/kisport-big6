@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BIG6 - Dice Wheel Game</title>
+    <style>
+        body {
+            background: #000;
+            color: #0f0;
+            font-family: monospace;
+            padding: 20px;
+        }
+        #terminal {
+            white-space: pre-wrap;
+            font-size: 16px;
+            line-height: 1.4;
+        }
+        #input-line {
+            display: flex;
+            align-items: center;
+        }
+        #prompt {
+            white-space: pre;
+        }
+        #input {
+            background: transparent;
+            border: none;
+            color: #0f0;
+            font-family: monospace;
+            font-size: 16px;
+            outline: none;
+            flex: 1;
+        }
+        #loading {
+            color: #ff0;
+        }
+    </style>
+</head>
+<body>
+    <div id="terminal"></div>
+    <div id="input-line" style="display: none;">
+        <span id="prompt"></span>
+        <input type="text" id="input" autofocus>
+    </div>
+    <div id="loading">Loading Pyodide...</div>
+
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+    <script>
+        const terminal = document.getElementById('terminal');
+        const inputLine = document.getElementById('input-line');
+        const promptSpan = document.getElementById('prompt');
+        const inputField = document.getElementById('input');
+        const loading = document.getElementById('loading');
+
+        let pyodide;
+        let inputResolve = null;
+
+        function write(text) {
+            terminal.textContent += text;
+            window.scrollTo(0, document.body.scrollHeight);
+        }
+
+        async function getInput(prompt) {
+            promptSpan.textContent = prompt;
+            inputLine.style.display = 'flex';
+            inputField.value = '';
+            inputField.focus();
+
+            return new Promise(resolve => {
+                inputResolve = resolve;
+            });
+        }
+
+        inputField.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && inputResolve) {
+                const value = inputField.value;
+                write(promptSpan.textContent + value + '\n');
+                inputLine.style.display = 'none';
+                inputResolve(value);
+                inputResolve = null;
+            }
+        });
+
+        async function main() {
+            pyodide = await loadPyodide();
+            loading.style.display = 'none';
+
+            pyodide.globals.set('js_print', (text) => write(text));
+            pyodide.globals.set('js_input', getInput);
+
+            const gameCode = await fetch('big6.py').then(r => r.text());
+
+            await pyodide.runPythonAsync(`
+import asyncio
+import random
+
+js_print_func = js_print
+js_input_func = js_input
+
+def custom_print(*args, end='\\n'):
+    text = ' '.join(str(a) for a in args) + end
+    js_print_func(text)
+
+async def custom_input(prompt=''):
+    result = await js_input_func(prompt)
+    return result
+
+# Patch builtins
+import builtins
+builtins.print = custom_print
+builtins._original_input = builtins.input
+
+async def async_input(prompt=''):
+    return await custom_input(prompt)
+`);
+
+            const modifiedCode = gameCode
+                .replace(/^from typing import Iterable$/m, '')
+                .replace(/Iterable\[int\]/g, 'list')
+                .replace(/input\(/g, 'await async_input(')
+                .replace(/def (prompt_\w+|main)\(/g, 'async def $1(')
+                .replace(/if __name__.*:[\s\S]*$/, '');
+
+            await pyodide.runPythonAsync(modifiedCode);
+            await pyodide.runPythonAsync('await main()');
+        }
+
+        main().catch(err => {
+            write('Error: ' + err.message + '\n');
+        });
+    </script>
+</body>
+</html>
