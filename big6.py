@@ -1,3 +1,4 @@
+import os
 import random
 from typing import Iterable
 
@@ -18,6 +19,20 @@ def print_intro() -> None:
     print("GOOD LUCK!")
     print()
     print()
+
+
+def make_rng_from_env() -> random.Random:
+    """Создаёт генератор, используя BIG6_SEED при наличии для детерминизма."""
+    seed = os.environ.get("BIG6_SEED")
+    if seed is None:
+        return random.Random()
+
+    try:
+        seed_value = int(seed)
+    except ValueError:
+        return random.Random()
+
+    return random.Random(seed_value)
 
 
 def prompt_bet_count() -> int | None:
@@ -220,7 +235,7 @@ def cash_out(winnings: int) -> None:
 
 def main() -> None:
     print_intro()
-    rng = random.Random()
+    rng = make_rng_from_env()
     winnings = 0
 
     while True:
