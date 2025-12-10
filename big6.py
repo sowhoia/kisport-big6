@@ -76,6 +76,48 @@ def prompt_single_bet() -> tuple[int, int]:
         print("THE HOUSE LIMIT IS FROM $1 TO $500")
 
 
+def prompt_two_numbers() -> tuple[int, int]:
+    """Запрашивает два числа для ставки, сохраняя исходную «широкую» проверку."""
+    while True:
+        raw = input("WHAT TWO NUMBERS")
+        parts = raw.replace(",", " ").split()
+        if len(parts) != 2:
+            print("YOU CAN ONLY BET ON AN INTEGER FROM ONE TO SIX.")
+            continue
+
+        try:
+            first, second = (int(part) for part in parts)
+        except ValueError:
+            print("YOU CAN ONLY BET ON AN INTEGER FROM ONE TO SIX.")
+            continue
+
+        if (first <= 6 or first >= 1) and (second <= 6 or second >= 1):
+            return first, second
+
+        print("YOU CAN ONLY BET ON AN INTEGER FROM ONE TO SIX.")
+
+
+def prompt_two_wagers() -> tuple[int, int]:
+    """Запрашивает две ставки; ограничения дома сохраняются как в BASIC (OR)."""
+    while True:
+        raw = input("WAGER ON BOTH")
+        parts = raw.replace(",", " ").split()
+        if len(parts) != 2:
+            print("THE HOUSE LIMIT IS FROM $1 TO $500.")
+            continue
+
+        try:
+            first, second = (int(part) for part in parts)
+        except ValueError:
+            print("THE HOUSE LIMIT IS FROM $1 TO $500.")
+            continue
+
+        if (first <= 500 or first >= 1) and (second <= 500 or second >= 1):
+            return first, second
+
+        print("THE HOUSE LIMIT IS FROM $1 TO $500.")
+
+
 def roll_lucky_numbers(rng: random.Random) -> list[int]:
     """Генерирует три броска кубика и возвращает отсортированный список."""
     rolls = sorted(rng.randint(1, 6) for _ in range(3))
@@ -138,7 +180,16 @@ def main() -> None:
             print_running_total(winnings)
             continue
 
-        print("MULTIPLE NUMBER BETS WILL BE ADDED IN THE NEXT STEPS.")
+        if bet_count == 2:
+            first_number, second_number = prompt_two_numbers()
+            first_wager, second_wager = prompt_two_wagers()
+            rolls = roll_lucky_numbers(rng)
+            winnings = resolve_single_bet(first_number, first_wager, rolls, winnings)
+            winnings = resolve_single_bet(second_number, second_wager, rolls, winnings)
+            print_running_total(winnings)
+            continue
+
+        print("THREE NUMBER BETS WILL BE ADDED IN THE NEXT STEP.")
 
 
 if __name__ == "__main__":
