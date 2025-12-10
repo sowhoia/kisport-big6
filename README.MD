@@ -6,28 +6,31 @@
 
 BIG6 — это азартная игра с игральными костями. Игрок может делать ставки на числа от 1 до 6, выбирая от 1 до 3 чисел за раунд. Бросаются три кости, и если выпадает загаданное число, игрок выигрывает ставку, умноженную на количество совпадений. Если число не выпало — ставка проиграна.
 
-Лимит ставок: от $1 до $500.
-
-Для выхода из игры введите `STOP`.
+Лимит ставок: от $1 до $500. Для выхода введите `STOP`.
 
 ## Платформы
 
-| Платформа | Файл | Статус |
-|-----------|------|--------|
-| Linux | `big6.py` | ✅ |
-| Windows | `big6.py` | ✅ |
-| Web (Pyodide) | `index.html` | ✅ |
-| Android (Termux) | `big6.py` | ✅ |
-| Plan9 | `big6_plan9.py` | ✅ |
-| Bootloader (симуляция) | `big6_boot.py` | ✅ |
+| Платформа | Команда | Описание |
+|-----------|---------|----------|
+| Linux | `make linux` | Python 2.7+ / 3.x |
+| Windows | `make win` | Python 2.7+ / 3.x |
+| Web | `make web` | Браузер (Pyodide) |
+| Android | Termux | `pkg install python && python big6.py` |
+| Plan9 | `python big6.py` | Python для Plan9 (9legacy/plan9port) |
 
-## Сборка и запуск
-
-### Linux / Windows
+## Запуск
 
 ```bash
-make run        # Запуск игры
-make test       # Запуск тестов
+make run        # Основной запуск
+make test       # Тесты
+make web        # http://localhost:8000
+```
+
+## Plan9
+
+Код совместим с Python 2.7+ (без type hints и f-strings):
+```
+python big6.py
 ```
 
 ### Web-версия

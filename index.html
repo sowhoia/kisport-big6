@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,18 +12,22 @@
             font-family: monospace;
             padding: 20px;
         }
+
         #terminal {
             white-space: pre-wrap;
             font-size: 16px;
             line-height: 1.4;
         }
+
         #input-line {
             display: flex;
             align-items: center;
         }
+
         #prompt {
             white-space: pre;
         }
+
         #input {
             background: transparent;
             border: none;
@@ -32,11 +37,13 @@
             outline: none;
             flex: 1;
         }
+
         #loading {
             color: #ff0;
         }
     </style>
 </head>
+
 <body>
     <div id="terminal"></div>
     <div id="input-line" style="display: none;">
@@ -82,17 +89,16 @@
             }
         });
 
-        async function main() {
+        async function runGame() {
             pyodide = await loadPyodide();
             loading.style.display = 'none';
 
             pyodide.globals.set('js_print', (text) => write(text));
             pyodide.globals.set('js_input', getInput);
 
-            const gameCode = await fetch('big6.py').then(r => r.text());
-
+            // Set up Python environment with async input
             await pyodide.runPythonAsync(`
-import asyncio
+import builtins
 import random
 
 js_print_func = js_print
@@ -102,34 +108,53 @@ def custom_print(*args, end='\\n'):
     text = ' '.join(str(a) for a in args) + end
     js_print_func(text)
 
-async def custom_input(prompt=''):
+async def async_input(prompt=''):
     result = await js_input_func(prompt)
     return result
 
-# Patch builtins
-import builtins
 builtins.print = custom_print
-builtins._original_input = builtins.input
-
-async def async_input(prompt=''):
-    return await custom_input(prompt)
 `);
 
-            const modifiedCode = gameCode
-                .replace(/^from typing import Iterable$/m, '')
-                .replace(/Iterable\[int\]/g, 'list')
-                .replace(/input\(/g, 'await async_input(')
-                .replace(/def (prompt_\w+|roll_lucky_numbers|resolve_single_bet|print_running_total|cash_out|main)\(/g, 'async def $1(')
-                .replace(/(prompt_bet_count|prompt_single_bet|prompt_two_numbers|prompt_two_wagers|prompt_three_numbers|prompt_three_wagers|roll_lucky_numbers)\(\)/g, 'await $1()')
-                .replace(/if __name__.*:[\s\S]*$/, '');
+            // Load big6.py and transform it using Python itself
+            const gameCode = await fetch('big6.py').then(r => r.text());
 
-            await pyodide.runPythonAsync(modifiedCode);
+            await pyodide.runPythonAsync(`
+import re
+
+game_code = ${JSON.stringify(gameCode)}
+
+# Remove typing imports
+game_code = re.sub(r'^from typing import Iterable$', '', game_code, flags=re.MULTILINE)
+game_code = game_code.replace('Iterable[int]', 'list')
+
+# Remove if __name__ block
+game_code = re.sub(r'\\nif __name__.*', '', game_code, flags=re.DOTALL)
+
+# Make functions async
+for func in ['print_intro', 'prompt_bet_count', 'prompt_single_bet', 'prompt_two_numbers', 
+             'prompt_two_wagers', 'prompt_three_numbers', 'prompt_three_wagers', 'main']:
+    game_code = game_code.replace(f'def {func}(', f'async def {func}(')
+
+# Replace input() calls with await - handle .strip() case first
+game_code = re.sub(r'input\\(([^)]+)\\)\\.strip\\(\\)', r'(await async_input(\\1)).strip()', game_code)
+# Then handle remaining input() calls  
+game_code = re.sub(r'(?<!await async_)input\\(', 'await async_input(', game_code)
+
+# Add await to function calls
+for func in ['print_intro', 'prompt_bet_count', 'prompt_single_bet', 
+             'prompt_two_numbers', 'prompt_two_wagers', 'prompt_three_numbers', 'prompt_three_wagers']:
+    # Only add await if not already in def line
+    game_code = re.sub(f'(?<!def )({func}\\\\(\\\\))', f'await {func}()', game_code)
+
+exec(game_code)
+`);
             await pyodide.runPythonAsync('await main()');
         }
 
-        main().catch(err => {
-            write('Error: ' + err.message + '\n');
+        runGame().catch(err => {
+            write('Error: ' + err.message + '\\n');
         });
     </script>
 </body>
+
 </html>

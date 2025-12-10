@@ -1,6 +1,6 @@
 PYTHON ?= python3
 
-.PHONY: all run test clean web plan9 boot linux win
+.PHONY: all run test clean web linux win
 
 all: run
 
@@ -20,12 +20,7 @@ web:
 	@echo "Starting web version with Pyodide..."
 	$(PYTHON) -m http.server 8000
 
-plan9:
-	$(PYTHON) big6_plan9.py
-
-boot:
-	$(PYTHON) big6_boot.py
-
 clean:
 	rm -rf __pycache__ *.pyc tests/*.actual
+
 

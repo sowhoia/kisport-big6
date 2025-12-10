@@ -1,9 +1,16 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+BIG6 - Dice Wheel Game
+Port from More BASIC Computer Games (Creative Computing)
+
+Compatible with Python 2.7+ and Plan9
+"""
 import os
 import random
-from typing import Iterable
 
 
-def print_intro() -> None:
+def print_intro():
     """Выводит вступительный текст, повторяя оформление версии на BASIC."""
     print(" " * 26 + "BIG6")
     print(" " * 19 + "CREATIVE COMPUTING")
@@ -21,7 +28,7 @@ def print_intro() -> None:
     print()
 
 
-def make_rng_from_env() -> random.Random:
+def make_rng_from_env():
     """Создаёт генератор, используя BIG6_SEED при наличии для детерминизма."""
     seed = os.environ.get("BIG6_SEED")
     if seed is None:
@@ -35,7 +42,7 @@ def make_rng_from_env() -> random.Random:
     return random.Random(seed_value)
 
 
-def prompt_bet_count() -> int | None:
+def prompt_bet_count():
     """
     Запрашивает количество чисел для ставки.
 
@@ -57,7 +64,7 @@ def prompt_bet_count() -> int | None:
         print("YOU CANNOT BET ON LESS THAN ONE OR MORE THAN THREE NUMBERS.")
 
 
-def prompt_single_bet() -> tuple[int, int]:
+def prompt_single_bet():
     """
     Запрашивает число и ставку для одиночной ставки.
 
@@ -91,7 +98,7 @@ def prompt_single_bet() -> tuple[int, int]:
         print("THE HOUSE LIMIT IS FROM $1 TO $500")
 
 
-def prompt_two_numbers() -> tuple[int, int]:
+def prompt_two_numbers():
     """Запрашивает два числа для ставки, сохраняя исходную «широкую» проверку."""
     while True:
         raw = input("WHAT TWO NUMBERS? ")
@@ -112,7 +119,7 @@ def prompt_two_numbers() -> tuple[int, int]:
         print("YOU CAN ONLY BET ON AN INTEGER FROM ONE TO SIX.")
 
 
-def prompt_two_wagers() -> tuple[int, int]:
+def prompt_two_wagers():
     """Запрашивает две ставки; ограничения дома сохраняются как в BASIC (OR)."""
     while True:
         raw = input("WAGER ON BOTH? ")
@@ -133,7 +140,7 @@ def prompt_two_wagers() -> tuple[int, int]:
         print("THE HOUSE LIMIT IS FROM $1 TO $500.")
 
 
-def prompt_three_numbers() -> tuple[int, int, int]:
+def prompt_three_numbers():
     """Запрашивает три числа для ставки, отражая исходные проверки через OR."""
     while True:
         raw = input("WHAT THREE NUMBERS? ")
@@ -161,7 +168,7 @@ def prompt_three_numbers() -> tuple[int, int, int]:
         print("YOU CAN ONLY BET ON AN INTEGER FROM ONE TO SIX.")
 
 
-def prompt_three_wagers() -> tuple[int, int, int]:
+def prompt_three_wagers():
     """Запрашивает три ставки, оставляя оригинальные границы с OR."""
     while True:
         raw = input("WAGER ON EACH OF THE THREE? ")
@@ -189,51 +196,49 @@ def prompt_three_wagers() -> tuple[int, int, int]:
         print("THE HOUSE LIMIT IS FROM $1 TO $500.")
 
 
-def roll_lucky_numbers(rng: random.Random) -> list[int]:
+def roll_lucky_numbers(rng):
     """Генерирует три броска кубика и возвращает отсортированный список."""
     rolls = sorted(rng.randint(1, 6) for _ in range(3))
-    print(f"THE LUCKY NUMBERS ARE: {rolls[0]} {rolls[1]} {rolls[2]}")
+    print("THE LUCKY NUMBERS ARE: %d %d %d" % (rolls[0], rolls[1], rolls[2]))
     return rolls
 
 
-def resolve_single_bet(
-    number: int, wager: int, rolls: Iterable[int], winnings: int
-) -> int:
+def resolve_single_bet(number, wager, rolls, winnings):
     """Применяет одиночную ставку к текущему балансу выигрыша."""
     matches = sum(1 for roll in rolls if roll == number)
     if matches > 0:
         wager *= matches
-        print(f"YOU WIN {matches} TIMES ON:{number}")
+        print("YOU WIN %d TIMES ON:%d" % (matches, number))
     else:
         wager *= -1
-        print(f"YOU LOSE ON: {number}")
+        print("YOU LOSE ON: %d" % number)
 
     return winnings + wager
 
 
-def print_running_total(winnings: int) -> None:
+def print_running_total(winnings):
     """Выводит текущий итоговый баланс после раунда."""
     if winnings == 0:
         print("YOU'RE EVEN!!")
     elif winnings > 0:
-        print(f"YOU'RE AHEAD ${winnings}")
+        print("YOU'RE AHEAD $%d" % winnings)
     else:
-        print(f"YOU'RE BEHIND ${winnings}")
+        print("YOU'RE BEHIND $%d" % winnings)
     print()
 
 
-def cash_out(winnings: int) -> None:
+def cash_out(winnings):
     """Завершает игру и выводит финальное сообщение при STOP."""
     print()
     print()
     print("SO YOU WANT TO CASH IN YOUR CHIPS, I SEE!!")
     if winnings > 0:
-        print(f"YOU WON EXACTLY ${winnings}!! NOT BAD !!!")
+        print("YOU WON EXACTLY $%d!! NOT BAD !!!" % winnings)
     else:
         print("YOU DIDN'T WIN ANY MONEY, BUT I'M WILLING TO CALL IT EVEN!!")
 
 
-def main() -> None:
+def main():
     print_intro()
     rng = make_rng_from_env()
     winnings = 0
@@ -271,4 +276,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
